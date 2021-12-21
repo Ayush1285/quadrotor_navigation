@@ -1,9 +1,8 @@
-# quadrotor_navigation
 
-### Objectives
+## Objectives
 * To implement autonomous navigation in unknown environment, given the desired goal.
 
-### Path Planning
+## Path Planning
 #### A* 
 <img src="results/astar.png" height="300" width="300">
 
