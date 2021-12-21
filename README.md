@@ -4,7 +4,7 @@
 
 ## Path Planning
 
-A* ![](https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/astar.png) | A* with collision cost ![](https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/astarwithcollisioncost.png)
+A* <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/astar.png" height="400"> | A* with collision cost <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/astarwithcollisioncost.png" height="400">
 -------------------|---------------------
 
 #### A* planner integrated with RVIZ GUI
