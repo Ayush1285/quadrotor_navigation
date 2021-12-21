@@ -19,5 +19,5 @@
 
 
 ### Acknowledgements
-* I have used ![Cubic Spline](https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning/CubicSpline) module for generating spline through nodes.
+* I have used [Cubic Spline](https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning/CubicSpline) module for generating spline through nodes.
 
