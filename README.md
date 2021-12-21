@@ -4,10 +4,10 @@
 
 ## Path Planning
 #### A* 
-<img src="results/astar.png" height="300" width="300">
+A* <img src="results/astar.png" height="300" width="300"> | A* with collision cost <img src="results/astarwithcollisioncost.png" height="300" width="300">
+-------------------|---------------------
 
-#### A* with collision cost around obstacles 
-<img src="results/astarwithcollisioncost.png" height="300" width="300">
+
 
 #### A* planner integrated with RVIZ GUI
 ![](https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/astar_rviz.gif)
