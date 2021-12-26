@@ -1,7 +1,7 @@
 <launch>
 
     <node pkg="tf" type="static_transform_publisher" name="staticmap" args="0 0 0 0 0 0 map my_frame 50" />
-    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find quadrotor_nav)/src/planner.rviz"/>
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find quadrotor_nav)/config/planner.rviz"/>
     <node pkg="quadrotor_nav" type="runastar.py" name="runastar"></node>
 
 </launch>
