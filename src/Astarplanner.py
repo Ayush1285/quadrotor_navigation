@@ -1,169 +1,163 @@
 #!/usr/bin/env python3
 import numpy as np
-import math
-from nav_msgs.msg import OccupancyGrid
-import matplotlib.pyplot as plt
-from matplotlib import colors
-import scipy.signal as signal
-import numpy as np
+from math import ceil,inf,hypot,sqrt
 from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped
 from math import sqrt
+from numpy.core.numeric import Inf
 from rdp import runrdp
 
 
 class Astar:
-    def __init__(self,resolution,robotradius):
+    def __init__(self,resolution,robotradius,map):
         
-        self.map = np.ones((120,120))*(0)
+        self.map = map
         self.resolution = resolution
         self.rr = robotradius
         self.Rd = robotradius + 0.1
-        self.collisioncostmap = np.zeros((self.map.shape))
         self.krep = 20
-        self.parent = np.zeros((120,120))    
-
+        self.collisioncostmap = np.zeros(self.map.shape)
+        self.parent = np.zeros((120,120))
+        self.nrows = np.linspace(0,119,120) 
+        self.cols, self.rows = np.meshgrid(self.nrows,self.nrows)
+        self.updatecollisioncostmap()
+        
     def updatecollisioncostmap(self):
         for i in range(self.map.shape[0]):
             for j in range(self.map.shape[1]):
                 if self.map[i,j]==100:
-                    for k in range(math.ceil(2*self.Rd/self.resolution)):
-                        for l in range(math.ceil(2*self.Rd/self.resolution)):
+                    for k in range(ceil(2*self.Rd/self.resolution)):
+                        for l in range(ceil(2*self.Rd/self.resolution)):
                             currentobstaclecell = np.array([i,j])
-                            othercell = np.array([min(max(0,i-math.ceil(self.Rd/self.resolution))+k,119),min(max(0,j-math.ceil(self.Rd/self.resolution))+l,119)])
+                            othercell = np.array([min(max(0,i-ceil(self.Rd/self.resolution))+k,119),min(max(0,j-ceil(self.Rd/self.resolution))+l,119)])
                             distancebtwcells = np.linalg.norm(currentobstaclecell-othercell)
                             if distancebtwcells < self.rr/self.resolution:
                                 self.collisioncostmap[othercell[0], othercell[1]] = max(self.collisioncostmap[othercell[0],\
-                                othercell[1]],math.inf)
+                                othercell[1]],inf)
                             elif distancebtwcells < self.Rd/self.resolution:
                                 self.collisioncostmap[othercell[0], othercell[1]] = max(self.collisioncostmap[othercell[0], othercell[1]],\
                                 self.krep*((self.Rd/self.resolution - distancebtwcells)/(self.Rd/self.resolution - self.rr/self.resolution))**2)
-
-   
+          
     def linesegment(self, p1, p2):
 
         length = sqrt((p1[1]-p2[1])**2 + (p1[0]-p2[0])**2)
 
         if p2[0] == p1[0]:
-            py = np.linspace(p1[1],p2[1], int(length/0.05) )
+            py = np.linspace(p1[1],p2[1], int(length/0.2) )
             px = np.ones(len(py))*p1[0]
             return np.c_[px[1:],py[1:]]
 
 
         slope = ((p2[1]-p1[1])/(p2[0]-p1[0]))
-        px = np.linspace(p1[0],p2[0],int(length/0.05))
+        px = np.linspace(p1[0],p2[0],int(length/0.2))
         py = slope*(px - np.ones(len(px))*p1[0]) + np.ones(len(px))*p1[1]
 
         return np.c_[px[1:],py[1:]]
 
-    def astarplanner(self, start, goal, map):
-        self.map = map
-        self.updatecollisioncostmap()
-        #self.collisioncostmap = self.collisioncostmap*0
+    def astarplanner(self, start, goal):
 
+        self.distheuristic = np.sqrt(np.square(self.rows-np.ones(self.map.shape)*self.rows[goal])+\
+            np.square(self.cols-np.ones(self.map.shape)*self.cols[goal]))
 
+        self.h = self.distheuristic + self.collisioncostmap # total heuristic cost
 
-        self.fcost = np.ones((self.map.shape))*math.inf  # Astar f costmap initialisation : f = g + h
-        self.gcost = np.ones((self.map.shape))*math.inf  # Astar g costmap initialisation : g the distance from start to current node
-        self.gcost[start[0],start[1]] = 0
-        self.fcost[start[0],start[1]] = self.gcost[start[0],start[1]] + np.linalg.norm(np.array([start[0],start[1]])-goal)\
-            +self.collisioncostmap[0,int(self.map.shape[0]/2)-1]
+        self.fcost = np.ones((self.map.shape))*inf  # Astar f costmap initialisation : f = g + h
+        self.gcost = np.ones((self.map.shape))*inf  # Astar g costmap initialisation : g the distance from start to current node
+        self.gcost[start] = 0
+        self.fcost[start] = self.gcost[start[0],start[1]] + self.h[start]
                                                                                             #euclidean distance heuristic
+        openlist = [[self.fcost[start],start]]
+        closedlist = np.ones(self.map.shape,dtype=bool)
 
         while True:
-            i,j = np.unravel_index(self.fcost.argmin(),self.fcost.shape)
-
-            if self.resolution*np.linalg.norm(np.array([i,j])-goal) < 0.05 or self.fcost[i,j] == math.inf:
+            openlist = sorted(openlist)
+            i,j = openlist[0][1]
+            if i==goal[0] and j==goal[1] or self.fcost[i,j] == inf:
                 break
             
-            self.fcost[i,j] = math.inf
+            openlist.pop(0)
+            closedlist[i][j] = False
 
-            if self.map[min(i+1,119),j] in [-1,0]:
-                if self.gcost[min(i+1,119),j] > self.gcost[i,j] + 1 :
+            if self.map[min(i+1,119),j] in [-1,0] and closedlist[min(i+1,119),j] == True :
+                fnew = self.gcost[i,j] + 1 + self.h[min(i+1,119),j]
+                if self.fcost[min(i+1,119),j] == inf or self.fcost[min(i+1,119),j] > fnew :
+                    openlist.append([fnew,(min(i+1,119),j)])
                     self.gcost[min(i+1,119),j] = self.gcost[i,j] + 1
-                    self.fcost[min(i+1,119),j] = self.gcost[min(i+1,119),j] + \
-                        np.linalg.norm(np.array([min(i+1,119),j])-goal) + self.collisioncostmap[min(i+1,119),j]
-
+                    self.fcost[min(i+1,119),j] = fnew
                     self.parent[min(i+1,119),j] = int(120*i+j)
             
-            if self.map[min(i+1,119),min(j+1,119)] in [-1,0]:
-                if self.gcost[min(i+1,119),min(j+1,119)] > self.gcost[i,j] + 1.4 :
+            if self.map[min(i+1,119),min(j+1,119)] in [-1,0] and closedlist[min(i+1,119),min(j+1,119)] == True:
+                fnew = self.gcost[i,j] + 1.4 + self.h[min(i+1,119),min(j+1,119)]
+                if self.fcost[min(i+1,119),min(j+1,119)] > fnew or self.fcost[min(i+1,119),min(j+1,119)]==inf:
+                    openlist.append([fnew,(min(i+1,119),min(j+1,119))])
                     self.gcost[min(i+1,119),min(j+1,119)] = self.gcost[i,j] + 1.4
-                    self.fcost[min(i+1,119),min(j+1,119)] = self.gcost[min(i+1,119),min(j+1,119)] + \
-                        np.linalg.norm(np.array([min(i+1,119),min(j+1,119)])-goal) + self.collisioncostmap[min(i+1,119),min(j+1,119)]
-
+                    self.fcost[min(i+1,119),min(j+1,119)] = fnew
                     self.parent[min(i+1,119),min(j+1,119)] = int(120*i+j)
 
-            if self.map[i,min(j+1,119)] in [-1,0]:
-                if self.gcost[i,min(j+1,119)] > self.gcost[i,j] + 1 :
+            if self.map[i,min(j+1,119)] in [-1,0] and closedlist[i,min(j+1,119)] == True:
+                fnew = self.gcost[i,j] + 1 + self.h[i,min(j+1,119)]
+                if self.fcost[i,min(j+1,119)] > fnew or self.fcost[i,min(j+1,119)] == inf:
+                    openlist.append([fnew,(i,min(j+1,119))])
                     self.gcost[i,min(j+1,119)] = self.gcost[i,j] + 1
-                    self.fcost[i,min(j+1,119)] = self.gcost[i,min(j+1,119)] + \
-                        np.linalg.norm(np.array([i,min(j+1,119)])-goal) + self.collisioncostmap[i,min(j+1,119)]
-
+                    self.fcost[i,min(j+1,119)] = fnew
                     self.parent[i,min(j+1,119)] = int(120*i+j)
 
-            if self.map[max(i-1,0),min(j+1,119)] in [-1,0]:
-                if self.gcost[max(i-1,0),min(j+1,119)] > self.gcost[i,j] + 1.4 :
+            if self.map[max(i-1,0),min(j+1,119)] in [-1,0] and closedlist[max(i-1,0),min(j+1,119)] == True:
+                fnew = self.gcost[i,j] + 1.4 + self.h[max(i-1,0),min(j+1,119)]
+                if self.fcost[max(i-1,0),min(j+1,119)] > fnew or self.fcost[max(i-1,0),min(j+1,119)] == inf:
+                    openlist.append([fnew,(max(i-1,0),min(j+1,119))])
                     self.gcost[max(i-1,0),min(j+1,119)] = self.gcost[i,j] + 1.4
-                    self.fcost[max(i-1,0),min(j+1,119)] = self.gcost[max(i-1,0),min(j+1,119)] + \
-                        np.linalg.norm(np.array([max(i-1,0),min(j+1,119)])-goal) + self.collisioncostmap[max(i-1,0),min(j+1,119)]
-
+                    self.fcost[max(i-1,0),min(j+1,119)] = fnew
                     self.parent[max(i-1,0),min(j+1,119)] = int(120*i+j)
 
-            if self.map[max(i-1,0),j] in [-1,0]:
-                if self.gcost[max(i-1,0),j] > self.gcost[i,j] + 1 :
+            if self.map[max(i-1,0),j] in [-1,0] and closedlist[max(i-1,0),j] == True:
+                fnew = self.gcost[i,j] + 1 + self.h[max(i-1,0),j]
+                if self.fcost[max(i-1,0),j] > fnew or self.fcost[max(i-1,0),j] == inf:
+                    openlist.append([fnew,(max(i-1,0),j)])
                     self.gcost[max(i-1,0),j] = self.gcost[i,j] + 1
-                    self.fcost[max(i-1,0),j] = self.gcost[max(i-1,0),j] + \
-                        np.linalg.norm(np.array([max(i-1,0),j])-goal) + self.collisioncostmap[max(i-1,0),j]
-
+                    self.fcost[max(i-1,0),j] = fnew
                     self.parent[max(i-1,0),j] = int(120*i+j)
 
-            if self.map[max(i-1,0),max(j-1,0)] in [-1,0]:
-                if self.gcost[max(i-1,0),max(j-1,0)] > self.gcost[i,j] + 1.4 :
+            if self.map[max(i-1,0),max(j-1,0)] in [-1,0] and closedlist[max(i-1,0),max(j-1,0)] == True:
+                fnew = self.gcost[i,j] + 1.4 + self.h[max(i-1,0),max(j-1,0)]
+                if self.fcost[max(i-1,0),max(j-1,0)] > fnew or self.fcost[max(i-1,0),max(j-1,0)] == inf:
+                    openlist.append([fnew,(max(i-1,0),max(j-1,0))])
                     self.gcost[max(i-1,0),max(j-1,0)] = self.gcost[i,j] + 1.4
-                    self.fcost[max(i-1,0),max(j-1,0)] = self.gcost[max(i-1,0),max(j-1,0)] + \
-                        np.linalg.norm(np.array([max(i-1,0),j])-goal) + self.collisioncostmap[max(i-1,0),max(j-1,0)]
-
+                    self.fcost[max(i-1,0),max(j-1,0)] = fnew
                     self.parent[max(i-1,0),max(j-1,0)] = int(120*i+j)
 
-            if self.map[i,max(j-1,0)] in [-1,0]:
-                if self.gcost[i,max(j-1,0)] > self.gcost[i,j] + 1 :
+            if self.map[i,max(j-1,0)] in [-1,0] and closedlist[i,max(j-1,0)] == True:
+                fnew = self.gcost[i,j] + 1 + self.h[i,max(j-1,0)]
+                if self.fcost[i,max(j-1,0)] > fnew or self.fcost[i,max(j-1,0)] == inf :
+                    openlist.append([fnew,(i,max(j-1,0))])
                     self.gcost[i,max(j-1,0)] = self.gcost[i,j] + 1
-                    self.fcost[i,max(j-1,0)] = self.gcost[i,max(j-1,0)] + \
-                        np.linalg.norm(np.array([i,j])-goal) + self.collisioncostmap[i,max(j-1,0)]
-
+                    self.fcost[i,max(j-1,0)] = fnew
                     self.parent[i,max(j-1,0)] = int(120*i+j)
 
-            if self.map[min(i+1,119),max(j-1,0)] in [-1,0]:
-                if self.gcost[min(i+1,119),max(j-1,0)] > self.gcost[i,j] + 1.4 :
+            if self.map[min(i+1,119),max(j-1,0)] in [-1,0] and closedlist[min(i+1,119),max(j-1,0)] == True:
+                fnew = self.gcost[i,j] + 1.4 + self.h[min(i+1,119),max(j-1,0)]
+                if self.fcost[min(i+1,119),max(j-1,0)] > fnew or self.fcost[min(i+1,119),max(j-1,0)] == inf :
+                    openlist.append([fnew,(min(i+1,119),max(j-1,0))])
                     self.gcost[min(i+1,119),max(j-1,0)] = self.gcost[i,j] + 1.4
-                    self.fcost[min(i+1,119),max(j-1,0)] = self.gcost[min(i+1,119),max(j-1,0)] + \
-                        np.linalg.norm(np.array([min(i+1,119),j])-goal) + self.collisioncostmap[min(i+1,119),max(j-1,0)]
-
+                    self.fcost[min(i+1,119),max(j-1,0)] = self.gcost[min(i+1,119),max(j-1,0)] + self.h[min(i+1,119),max(j-1,0)]
                     self.parent[min(i+1,119),max(j-1,0)] = int(120*i+j)
-
         pathros = Path()
         pathros.header.frame_id = "map"
-        path = [int(self.parent[i,j])]
-        ypos,xpos = np.unravel_index(path[0],self.map.shape)
-        ypos = [self.resolution*ypos]
-        xpos = [self.resolution*xpos]
+        path = [int(120*i+j)]
+        ypos = [i*self.resolution]
+        xpos = [j*self.resolution]
         points = [[xpos[0],ypos[0]]]
         while path[0] != 120*start[0]+start[1] :
-            #pose = PoseStamped()
-            #pose.header.frame_id = 'map'
             i,j = np.unravel_index(int(path[0]), self.map.shape, order='C')
             path = [int(self.parent[i,j])] + path
             yp,xp = np.unravel_index(path[0],self.map.shape)
+            
             xp = xp*self.resolution
             yp = yp*self.resolution
             points = [[xp,yp]]+points
             xpos = [xp]+xpos
             ypos = [yp]+ypos
-            #pose.pose.position.x = self.resolution*xp
-            #pose.pose.position.y = self.resolution*yp
-            #pathros.poses.append(pose)
-
+           
         lines = runrdp(points,0.1)
         lines = np.array(lines)
         
@@ -171,16 +165,16 @@ class Astar:
             linesegment = self.linesegment(lines[i,:],lines[i+1,:])
             if i == 0:
                 new_lines = np.reshape(lines[i,:],(1,2))
-                print(new_lines.shape)
             new_lines = np.r_[new_lines,linesegment,lines[i+1,:].reshape((1,2))]
 
 
 
-
-        z = np.polyfit(new_lines[:,0], new_lines[:,1], 8)
+        '''z = np.polyfit(new_lines[:,0], new_lines[:,1], 12)
         f = np.poly1d(z)
         x_new = np.linspace(new_lines[0,0], new_lines[-1,0], len(new_lines[:,0]))
-        y_new = f(x_new)
+        y_new = f(x_new)'''
+        
+        #for i in range(len(x_new)):
         for i in range(len(new_lines[:,0])):
         #for i in range(len(xpos)):
             pose = PoseStamped()

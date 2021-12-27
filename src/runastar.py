@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
 import numpy as np
-import matplotlib as mpl
-from matplotlib import pyplot
 from nav_msgs.msg import Path, OccupancyGrid
 from geometry_msgs.msg import PoseStamped,PoseWithCovarianceStamped
-from scipy import interpolate
-from cubicspline import calc_2d_spline_interpolation
+#from scipy import interpolate
 from genmap import generatemap
 from Astarplanner import Astar
 import rospy
-from tf.transformations import quaternion_from_euler
-import timeit
 
 map = generatemap()
 mapdata = map.flatten()
@@ -23,12 +18,12 @@ def main():
 
     def startcb(data):
         global start
-        start = np.array([int(data.pose.pose.position.y/0.08),int(data.pose.pose.position.x/0.08)])
+        start = (int(data.pose.pose.position.y/0.08),int(data.pose.pose.position.x/0.08))
         
 
     def goalcb(data):
-        navgoal = np.array([int(data.pose.position.y/0.08),int(data.pose.position.x/0.08)])
-        path = planner.astarplanner(start, navgoal, map)
+        navgoal = (int(data.pose.position.y/0.08),int(data.pose.position.x/0.08))
+        path = planner.astarplanner(start, navgoal)
         
         pathpub.publish(path)
 
@@ -40,10 +35,13 @@ def main():
     rospy.Subscriber('/initialpose',PoseWithCovarianceStamped,startcb)
     pathpub = rospy.Publisher('/path', Path, queue_size=1)
     mapmsg = OccupancyGrid()
-    
-    robotradius = 0.3
+    #start = (5,20)
+    #navgoal = (110,100)
+    robotradius = 0.2
     resolution = 0.08
-    planner = Astar(resolution,robotradius)
+    planner = Astar(resolution,robotradius,map)
+
+    #path = planner.astarplanner(start, navgoal, map)
 
     mapmsg.header.frame_id = 'map'
     mapmsg.info.height = 120
@@ -55,6 +53,7 @@ def main():
     
     while not rospy.is_shutdown():
         mappub.publish(mapmsg)
+        #pathpub.publish(path)
         rate.sleep()
 
 if __name__ == "__main__":
