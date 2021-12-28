@@ -8,7 +8,7 @@ normal A*      |  A* with collision cost near obstacles
 :-------------------------:|:-------------------------:
 <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/normalastar.png" height="400"> | <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/astarwithcollisioncost.png" height="400">
 
-A* after processing with RDP Algorithm   |  Final Trajectory after polynomial curve fitting
+A* after processing with RDP Algorithm   |  Final Trajectory after B Spline approximation
 :-------------------------:|:-------------------------:
 <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/astarafterrdp.png" height="400"> | <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/finaltraj.png" height="400">
 
