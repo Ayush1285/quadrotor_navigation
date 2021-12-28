@@ -1,6 +1,6 @@
 <launch>
 
-  <include file="$(find quadrotor_nav)/launch/gmap.launch" />
+  <include file="$(find quadcopter)/launch/gmap.launch" />
   
   
   

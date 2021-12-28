@@ -1,72 +1,52 @@
 #!/usr/bin/env python3
-# ROS python API
 import rospy
 
-# 3D point & Stamped Pose msgs
-from geometry_msgs.msg import Point, PoseStamped
-# import all mavros messages and services
-from mavros_msgs.msg import *
-from mavros_msgs.srv import *
+from geometry_msgs.msg import Point, PoseStamped, Pose
+from mavros_msgs.msg import State,PositionTarget
+from mavros_msgs.srv import CommandBool,SetMode
+from tf.transformations import euler_from_quaternion
 
-# Flight modes class
-# Flight modes are activated using ROS services
 class flightModes:
     def __init__(self):
         pass
 
-    
-
     def setArm(self):
         rospy.wait_for_service('mavros/cmd/arming')
         try:
-            armService = rospy.ServiceProxy('mavros/cmd/arming', mavros_msgs.srv.CommandBool)
+            armService = rospy.ServiceProxy('mavros/cmd/arming', CommandBool)
             armService(True)
         except rospy.ServiceException as e:
-            print("Service arming call failed")
+            print("Service arm call failed")
 
     def setDisarm(self):
         rospy.wait_for_service('mavros/cmd/arming')
         try:
-            armService = rospy.ServiceProxy('mavros/cmd/arming', mavros_msgs.srv.CommandBool)
+            armService = rospy.ServiceProxy('mavros/cmd/arming', CommandBool)
             armService(False)
         except rospy.ServiceException as e:
-            print("Service disarming call failed")
-
-    
+            print("Service disarm call failed")
 
     def setOffboardMode(self):
         rospy.wait_for_service('mavros/set_mode')
         try:
-            flightModeService = rospy.ServiceProxy('mavros/set_mode', mavros_msgs.srv.SetMode)
+            flightModeService = rospy.ServiceProxy('mavros/set_mode', SetMode)
             flightModeService(custom_mode='OFFBOARD')
         except rospy.ServiceException as e:
-            print("service set_mode call failed. Offboard Mode could not be set.")
-
-    
-
-   
+            print("service set_mode call failed")
 
 class Controller:
-    # initialization method
     def __init__(self):
-        # Drone state
         self.state = State()
-        # Instantiate a setpoints message
         self.sp = PositionTarget()
+
         # set the flag to use position setpoints and yaw angle
         self.sp.type_mask = int('000111111000', 2)
         # LOCAL_NED
         self.sp.coordinate_frame = 1
 
-        # We will fly at a fixed altitude for now
-        # Altitude setpoint, [meters]
-        self.ALT_SP = 1.0
-        # update the setpoint message with the required altitude
-        self.sp.position.z = self.ALT_SP
-        # Step size for position update
-        self.STEP_SIZE = 2.0
-		# Fence. We will assume a square fence for now
-        self.FENCE_LIMIT = 5.0
+        self.desired_height = 1.0
+        
+        self.sp.position.z = self.desired_height
 
         # A Message for the current local position of the drone
         self.local_pos = Point(0.0, 0.0, 1.0)
@@ -74,14 +54,8 @@ class Controller:
         # initial values for setpoints
         self.sp.position.x = 0.0
         self.sp.position.y = 0.0
-        self.sp.yaw = 0.0
-        
 
-        # speed of the drone is set using MPC_XY_CRUISE parameter in MAVLink
-        # using QGroundControl. By default it is 5 m/s.
-
-	# Callbacks
-    ## local position callback
+	
     def posCb(self, msg):
         self.local_pos.x = msg.pose.position.x
         self.local_pos.y = msg.pose.position.y
@@ -91,6 +65,53 @@ class Controller:
     ## Drone State callback
     def stateCb(self, msg):
         self.state = msg
+
+    def desSp(self, msg):
+        self.sp.position.x = msg.position.x 
+        self.sp.position.y = msg.position.y
+        self.sp.position.z = msg.position.z
+
+
+def main():
+    rospy.init_node('px4_offboard', anonymous=True)
+
+    modes = flightModes()
+    control = Controller()
+
+    rate = rospy.Rate(20.0)
+    rospy.Subscriber('mavros/state', State, control.stateCb)
+    rospy.Subscriber('desired/trajectory',Pose, control.desSp)
+    rospy.Subscriber('mavros/local_position/pose', PoseStamped, control.posCb)    
+    sp_pub = rospy.Publisher('mavros/setpoint_raw/local', PositionTarget, queue_size=1)
+
+
+    while not control.state.armed:
+        modes.setArm()
+        rate.sleep()
+
+    # set in takeoff mode and takeoff to default altitude (3 m)
+    # modes.setTakeoff()
+    # rate.sleep()
+
+    k=0
+    while k<10:
+        sp_pub.publish(control.sp)
+        rate.sleep()
+        k = k + 1
+
+    # activate OFFBOARD mode
+    modes.setOffboardMode()
+    
+    # ROS main loop
+    while not rospy.is_shutdown():
+        sp_pub.publish(control.sp)
+        rate.sleep()
+
+if __name__ == '__main__':
+    try:
+        main()	
+    except rospy.ROSInterruptException:
+        pass
 
   
 
