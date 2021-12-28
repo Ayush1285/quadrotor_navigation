@@ -16,7 +16,7 @@ A* after processing with RDP Algorithm   |  Final Trajectory after B Spline appr
 
 ![](https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/astarrviz.gif)
 
-#### Trajectory Tracking using PX4 OFFBOARD Control
+## Trajectory Tracking using PX4 OFFBOARD Control
 **Lemniscate Trajectory Following**
 
 ![](https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/lemniscatetraj.gif)
