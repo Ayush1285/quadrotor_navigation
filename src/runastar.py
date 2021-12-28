@@ -37,7 +37,7 @@ def main():
     mapmsg = OccupancyGrid()
     #start = (5,20)
     #navgoal = (110,100)
-    robotradius = 0.2
+    robotradius = 0.5
     resolution = 0.08
     planner = Astar(resolution,robotradius,map)
 

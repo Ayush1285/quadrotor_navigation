@@ -6,8 +6,7 @@ from geometry_msgs.msg import PoseStamped
 from math import sqrt
 from numpy.core.numeric import Inf
 from rdp import runrdp
-
-
+from bspline import approximate_b_spline_path
 class Astar:
     def __init__(self,resolution,robotradius,map):
         
@@ -40,16 +39,16 @@ class Astar:
           
     def linesegment(self, p1, p2):
 
-        length = sqrt((p1[1]-p2[1])**2 + (p1[0]-p2[0])**2)
+        length = hypot(p1[1]-p2[1],p1[0]-p2[0])
 
         if p2[0] == p1[0]:
-            py = np.linspace(p1[1],p2[1], int(length/0.2) )
+            py = np.linspace(p1[1],p2[1], int(length/2) )
             px = np.ones(len(py))*p1[0]
             return np.c_[px[1:],py[1:]]
 
 
         slope = ((p2[1]-p1[1])/(p2[0]-p1[0]))
-        px = np.linspace(p1[0],p2[0],int(length/0.2))
+        px = np.linspace(p1[0],p2[0],int(length/2))
         py = slope*(px - np.ones(len(px))*p1[0]) + np.ones(len(px))*p1[1]
 
         return np.c_[px[1:],py[1:]]
@@ -168,26 +167,22 @@ class Astar:
             new_lines = np.r_[new_lines,linesegment,lines[i+1,:].reshape((1,2))]
 
 
-
-        '''z = np.polyfit(new_lines[:,0], new_lines[:,1], 12)
-        f = np.poly1d(z)
-        x_new = np.linspace(new_lines[0,0], new_lines[-1,0], len(new_lines[:,0]))
-        y_new = f(x_new)'''
+        x = new_lines[:,0].tolist()
+        y = new_lines[:,1].tolist()
+        xpos,ypos = approximate_b_spline_path(x,y,80)
         
-        #for i in range(len(x_new)):
-        for i in range(len(new_lines[:,0])):
-        #for i in range(len(xpos)):
+        #for i in range(len(new_lines[:,0])):
+        for i in range(len(xpos)):
             pose = PoseStamped()
             pose.header.frame_id = 'map'
-            pose.pose.position.x = new_lines[i,0]
-            #pose.pose.position.x = x_new[i]
-            #pose.pose.position.x = xpos[i]
+            #pose.pose.position.x = new_lines[i,0]
+            pose.pose.position.x = xpos[i]
 
-            #pose.pose.position.y = ypos[i]
-            #pose.pose.position.y = y_new[i]
-            pose.pose.position.y = new_lines[i,1]
+            pose.pose.position.y = ypos[i]
+            #pose.pose.position.y = new_lines[i,1]
             pathros.poses.append(pose)
         return pathros
+        #return new_lines
 
 
 
