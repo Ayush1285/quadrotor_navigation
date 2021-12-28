@@ -17,6 +17,9 @@ A* after processing with RDP Algorithm   |  Final Trajectory after B Spline appr
 
 https://user-images.githubusercontent.com/64409716/147561036-dbcec514-4334-4120-b364-f63c99b41f11.mp4
 
+#### Trajectory Tracking using PX4 OFFBOARD Control
+**Lemniscate Trajectory Following**
+
 
 
 ## On-going Work
