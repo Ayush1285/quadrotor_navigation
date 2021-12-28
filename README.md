@@ -13,7 +13,10 @@ A* after processing with RDP Algorithm   |  Final Trajectory after B Spline appr
 <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/astarafterrdp.png" height="400"> | <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/finaltraj.png" height="400">
 
 #### A* planner integrated with RVIZ GUI
-![](https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/astar_rviz.gif)
+
+
+https://user-images.githubusercontent.com/64409716/147561036-dbcec514-4334-4120-b364-f63c99b41f11.mp4
+
 
 
 ## On-going Work
