@@ -35,30 +35,17 @@ def getKey():
 
 
 def main():
-
-    # initiate node
     rospy.init_node('px4_teleop', anonymous=True)
 
-    # flight mode object
     modes = flightModes()
-
-    # controller object
     control = Controller()
 
-    # ROS loop rate
     rate = rospy.Rate(20.0)
-
-    # Subscribe to drone state
     rospy.Subscriber('mavros/state', State, control.stateCb)
-
-    # Subscribe to drone's local position
-    rospy.Subscriber('mavros/local_position/pose', PoseStamped, control.posCb)
-
-    # Setpoint publisher    
+    rospy.Subscriber('mavros/local_position/pose', PoseStamped, control.posCb)    
     sp_pub = rospy.Publisher('mavros/setpoint_raw/local', PositionTarget, queue_size=1)
 
 
-    # Make sure the drone is armed
     while not control.state.armed:
         modes.setArm()
         rate.sleep()
@@ -67,7 +54,6 @@ def main():
     # modes.setTakeoff()
     # rate.sleep()
 
-    # We need to send few setpoint messages, then activate OFFBOARD mode, to take effect
     k=0
     while k<10:
         sp_pub.publish(control.sp)
@@ -88,51 +74,62 @@ def main():
             control.sp.position.y = control.local_pos.y
             control.sp.position.z = control.local_pos.z
             control.sp.yaw = control.curr_yaw
+            control.sp.yaw_rate = 0.0
 
         elif key == 's':
             control.sp.position.x = control.local_pos.x - 1
             control.sp.position.y = control.local_pos.y
             control.sp.position.z = control.local_pos.z
             control.sp.yaw = control.curr_yaw
+            control.sp.yaw_rate = 0.0
 
         elif key == 'a':
             control.sp.position.x = control.local_pos.x
             control.sp.position.y = control.local_pos.y + 1
             control.sp.position.z = control.local_pos.z
             control.sp.yaw = control.curr_yaw
+            control.sp.yaw_rate = 0.0
             
         elif key == 'd':
             control.sp.position.x = control.local_pos.x 
             control.sp.position.y = control.local_pos.y - 1
             control.sp.position.z = control.local_pos.z
-            control.sp.yaw = control.curr_yaw          
+            control.sp.yaw = control.curr_yaw
+            control.sp.yaw_rate = 0.0          
             
         elif key == '8':
             control.sp.position.x = control.local_pos.x
             control.sp.position.y = control.local_pos.y
-            control.sp.position.z = control.local_pos.z + 1
-            control.sp.yaw = control.curr_yaw           
+            control.sp.position.z = control.local_pos.z + 0.5
+            control.sp.yaw = control.curr_yaw 
+            control.sp.yaw_rate = 0.0          
 
         elif key == '5':
             control.sp.position.x = control.local_pos.x
             control.sp.position.y = control.local_pos.y
-            control.sp.position.z = control.local_pos.z - 1
+            control.sp.position.z = control.local_pos.z - 0.5
             control.sp.yaw = control.curr_yaw
+            control.sp.yaw_rate = 0.0
         elif key == '4':
             control.sp.position.x = control.local_pos.x
             control.sp.position.y = control.local_pos.y
             control.sp.position.z = control.local_pos.z
-            control.sp.yaw = control.curr_yaw + 0.3
+            control.sp.yaw = control.curr_yaw + 0.75
+            control.sp.yaw_rate = 0.3
         elif key == '6':
             control.sp.position.x = control.local_pos.x
             control.sp.position.y = control.local_pos.y
             control.sp.position.z = control.local_pos.z
-            control.sp.yaw = control.curr_yaw - 0.3    
+            control.sp.yaw = control.curr_yaw - 0.75
+            control.sp.yaw_rate = -0.3    
 
         elif key == 'enter':
             control.sp.position.x = control.local_pos.x 
             control.sp.position.y = control.local_pos.y
-            control.sp.position.z = control.local_pos.z                       
+            control.sp.position.z = control.local_pos.z
+            control.sp.yaw = control.curr_yaw
+            control.sp.yaw_rate = 0.0
+
 
 
         sp_pub.publish(control.sp)

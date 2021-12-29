@@ -39,28 +39,27 @@ class Controller:
         self.state = State()
         self.sp = PositionTarget()
 
-        # set the flag to use position setpoints and yaw angle
-        self.sp.type_mask = int('000111111000', 2)
-        # LOCAL_NED
+        self.sp.type_mask = int('001111111000', 2)
         self.sp.coordinate_frame = 1
 
-        self.desired_height = 1.0
+        self.desired_height = 2.0
         
         self.sp.position.z = self.desired_height
 
-        # A Message for the current local position of the drone
         self.local_pos = Point(0.0, 0.0, 1.0)
         self.curr_yaw = 0
-        # initial values for setpoints
         self.sp.position.x = 0.0
         self.sp.position.y = 0.0
+        self.sp.yaw = 0.0
+        self.sp.yaw_rate = 0.0
 
 	
     def posCb(self, msg):
         self.local_pos.x = msg.pose.position.x
         self.local_pos.y = msg.pose.position.y
         self.local_pos.z = msg.pose.position.z
-        self.curr_yaw = msg.pose.orientation.z
+        roll,pitch,yaw = euler_from_quaternion([msg.pose.orientation.x,msg.pose.orientation.y,msg.pose.orientation.z,msg.pose.orientation.w])
+        self.curr_yaw = yaw
 
     ## Drone State callback
     def stateCb(self, msg):
@@ -68,8 +67,10 @@ class Controller:
 
     def desSp(self, msg):
         self.sp.position.x = msg.position.x 
-        self.sp.position.y = msg.position.y
+        self.sp.position.y = msg.position.y + 10
         self.sp.position.z = msg.position.z
+        roll,pitch,yaw = euler_from_quaternion([msg.orientation.x,msg.orientation.y,msg.orientation.z,msg.orientation.w])
+        self.sp.yaw = yaw
 
 
 def main():
@@ -88,21 +89,13 @@ def main():
     while not control.state.armed:
         modes.setArm()
         rate.sleep()
-
-    # set in takeoff mode and takeoff to default altitude (3 m)
-    # modes.setTakeoff()
-    # rate.sleep()
-
     k=0
     while k<10:
         sp_pub.publish(control.sp)
         rate.sleep()
         k = k + 1
 
-    # activate OFFBOARD mode
     modes.setOffboardMode()
-    
-    # ROS main loop
     while not rospy.is_shutdown():
         sp_pub.publish(control.sp)
         rate.sleep()
