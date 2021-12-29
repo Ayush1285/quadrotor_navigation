@@ -21,6 +21,9 @@ A* after processing with RDP Algorithm   |  Final Trajectory after B Spline appr
 
 ![](https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/lemniscatetraj.gif)
 
+**Circle Trajectory**
+
+![](https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/circletraj.gif)
 
 ## On-going Work
 * Mapping 
