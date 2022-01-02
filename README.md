@@ -33,14 +33,9 @@ Generated Map of cylpillars.world using gmapping package
 ## Navigation
 Autonomous Navigation to given desired goal
 
-:------------------:|:-----------------------:
-https://user-images.githubusercontent.com/64409716/147886059-c0473ece-2cd6-4433-af7f-cd6db5dd0d08.mp4 |
- 
-
-https://user-images.githubusercontent.com/64409716/147886105-96bbf267-6bbe-426f-a7dc-b997f600359c.mp4
-
-
-
+RVIZ | Gazebo
+:---------------------:|:--------------------:
+<img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navrviz.gif"> | <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navgazebo.gif>
 
 
 ## Acknowledgements
