@@ -25,8 +25,10 @@ A* after processing with RDP Algorithm   |  Final Trajectory after B Spline appr
 
 ![](https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/circletraj.gif)
 
-## On-going Work
-* Mapping 
+## Mapping
+Generated Map of cylpillars.world using gmapping package
+
+* ![](https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/pillarsmap.png) 
 
 ## Acknowledgements
 * I have used [B Spline](https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning/BSplinePath) module.
