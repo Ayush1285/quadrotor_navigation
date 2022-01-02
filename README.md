@@ -35,7 +35,7 @@ Autonomous Navigation to given desired goal
 
 RVIZ | Gazebo
 :---------------------:|:--------------------:
-<img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navrviz.gif"> | <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navgazebo.gif>
+<img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navrviz.gif"> | <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navgazebo.gif">
 
 
 ## Acknowledgements
