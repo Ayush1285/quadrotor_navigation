@@ -1,4 +1,4 @@
-image: pillarsmap.pgm
+image: cylpillars.pgm
 resolution: 0.080000
 origin: [-20.800000, -18.240000, 0.000000]
 negate: 0
