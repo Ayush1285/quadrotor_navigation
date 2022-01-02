@@ -26,7 +26,8 @@ A* after processing with RDP Algorithm   |  Final Trajectory after B Spline appr
 ![](https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/circletraj.gif)
 
 ## Mapping
-Generated Map of cylpillars.world using gmapping package
+* Generated Map of cylpillars.world using gmapping package.
+* I have used ground truth for odometry information.
 
 <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/pillarsmap.png" height="400"> 
 
@@ -37,6 +38,13 @@ RVIZ | Gazebo
 :---------------------:|:--------------------:
 <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navrviz.gif"> | <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navgazebo.gif">
 
+## On-going Work
+* Code Cleaning/Optimizing
+* Navigation without prior built map
+
+## Future Work
+* Implementing different planners
+* VIO for Odometry Info
 
 ## Acknowledgements
 * I have used [B Spline](https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning/BSplinePath) module.
