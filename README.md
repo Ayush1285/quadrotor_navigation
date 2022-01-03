@@ -34,9 +34,13 @@ A* after processing with RDP Algorithm   |  Final Trajectory after B Spline appr
 ## Navigation
 Autonomous Navigation to given desired goal
 
-RVIZ | Gazebo
-:---------------------:|:--------------------:
-<img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navrviz.gif"> | <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navgazebo.gif">
+RVIZ
+
+<img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navrviz.gif">
+
+Gazebo
+
+<img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navgazebo.gif">
 
 ## On-going Work
 * Code Cleaning/Optimizing
