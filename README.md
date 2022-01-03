@@ -40,7 +40,10 @@ RVIZ
 
 Gazebo
 
-<img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navgazebo.gif">
+
+https://user-images.githubusercontent.com/64409716/147904810-0fa1841c-cde9-49d8-82e0-91144fad8688.mp4
+
+
 
 ## On-going Work
 * Code Cleaning/Optimizing
