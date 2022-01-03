@@ -47,7 +47,7 @@ def main():
         
         pathpub.publish(path)
 
-    robotradius = 0.4
+    robotradius = 0.6
     rospy.init_node('astar',anonymous=True)
     rate = rospy.Rate(20.0)
     #mappub = rospy.Publisher('/map', OccupancyGrid, queue_size=1)

@@ -183,7 +183,7 @@ class Astar:
         y = new_lines[:,1].tolist()
         print(x)
         print(y)
-        xpos,ypos = approximate_b_spline_path(x,y,int(totallength/0.3))
+        xpos,ypos = approximate_b_spline_path(x,y,int(totallength/0.2))
         
         #for i in range(len(new_lines[:,0])):
         for i in range(len(xpos)):

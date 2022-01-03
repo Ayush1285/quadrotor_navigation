@@ -30,7 +30,7 @@ def main():
 
 
     rospy.init_node('trajpub', anonymous=True)
-    rate = rospy.Rate(5.0)
+    rate = rospy.Rate(15.0)
 
     destaj = Pose()
     '''paths = Path()
