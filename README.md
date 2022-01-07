@@ -36,18 +36,11 @@ Autonomous Navigation to given desired goal
 
 **RVIZ**
 
-
-
-https://user-images.githubusercontent.com/64409716/147905968-02fa05b8-cd6a-49e4-845e-93c49d9979f5.mp4
-
-
+![](https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navigation.gif)
 
 **Gazebo**
 
-
-https://user-images.githubusercontent.com/64409716/147904810-0fa1841c-cde9-49d8-82e0-91144fad8688.mp4
-
-
+![](https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/navgazebo.gif)
 
 ## On-going Work
 * Code Cleaning/Optimizing
