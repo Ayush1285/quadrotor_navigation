@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import numpy as np
 from nav_msgs.msg import Path, OccupancyGrid,Odometry
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped,PoseWithCovarianceStamped
 #from scipy import interpolate
 from genmap import generatemap
 from Astarplanner import Astar
 import rospy
-np.reshape
+
 '''map = generatemap()
 mapdata = map.flatten()
 mapdata = mapdata.astype('int8')'''
@@ -54,7 +54,8 @@ def main():
     data = rospy.wait_for_message('/map',OccupancyGrid)
     mapCb(data)
     rospy.Subscriber('/move_base_simple/goal',PoseStamped,goalcb)
-    rospy.Subscriber('/ground_truth/state',Odometry,startcb)
+    #rospy.Subscriber('/ground_truth/state',Odometry,startcb)
+    rospy.Subscriber('initialpose',PoseWithCovarianceStamped,startcb)
     pathpub = rospy.Publisher('/path', Path, queue_size=1)
     #mapmsg = OccupancyGrid()
     #start = (25,5)

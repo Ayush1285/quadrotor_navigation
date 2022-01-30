@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import rospy
-
+from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Point, PoseStamped, Pose
 from mavros_msgs.msg import State,PositionTarget
 from mavros_msgs.srv import CommandBool,SetMode
@@ -55,10 +55,10 @@ class Controller:
 
 	
     def posCb(self, msg):
-        self.local_pos.x = msg.pose.position.x
-        self.local_pos.y = msg.pose.position.y
-        self.local_pos.z = msg.pose.position.z
-        roll,pitch,yaw = euler_from_quaternion([msg.pose.orientation.x,msg.pose.orientation.y,msg.pose.orientation.z,msg.pose.orientation.w])
+        self.local_pos.x = msg.pose.pose.position.x
+        self.local_pos.y = msg.pose.pose.position.y
+        self.local_pos.z = msg.pose.pose.position.z
+        roll,pitch,yaw = euler_from_quaternion([msg.pose.pose.orientation.x,msg.pose.pose.orientation.y,msg.pose.pose.orientation.z,msg.pose.pose.orientation.w])
         self.curr_yaw = yaw
 
     ## Drone State callback
@@ -66,8 +66,8 @@ class Controller:
         self.state = msg
 
     def desSp(self, msg):
-        self.sp.position.x = msg.position.x + 10
-        self.sp.position.y = msg.position.y + 10
+        self.sp.position.x = msg.position.x + 22
+        self.sp.position.y = msg.position.y + 49
         self.sp.position.z = msg.position.z
         roll,pitch,yaw = euler_from_quaternion([msg.orientation.x,msg.orientation.y,msg.orientation.z,msg.orientation.w])
         self.sp.yaw = yaw
@@ -79,10 +79,10 @@ def main():
     modes = flightModes()
     control = Controller()
 
-    rate = rospy.Rate(20.0)
+    rate = rospy.Rate(15.0)
     rospy.Subscriber('mavros/state', State, control.stateCb)
-    rospy.Subscriber('desired/trajectory',Pose, control.desSp)
-    rospy.Subscriber('mavros/local_position/pose', PoseStamped, control.posCb)    
+    rospy.Subscriber('desired/trajectory',Pose, control.desSp,queue_size=20)
+    rospy.Subscriber('/ground_truth/state', Odometry, control.posCb)    
     sp_pub = rospy.Publisher('mavros/setpoint_raw/local', PositionTarget, queue_size=1)
 
 

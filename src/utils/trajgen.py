@@ -1,7 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from bspline import approximate_b_spline_path,interpolate_b_spline_path
-from genmap import generatemap
+from bspline import approximate_b_spline_path
+
 
 
 def trajgenlemniscate():

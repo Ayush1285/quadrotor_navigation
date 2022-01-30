@@ -5,7 +5,7 @@ from geometry_msgs.msg import TransformStamped
 from nav_msgs.msg import Odometry
 
 
-rospy.init_node('uav_tf2_broadcaster')
+rospy.init_node('tf2_broadcaster')
 
 
 def publish_transform(data):

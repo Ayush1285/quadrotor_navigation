@@ -1,4 +1,4 @@
-import numpy as np
+
 from math import sqrt
 
 def distance(a, b):
