@@ -27,7 +27,7 @@ A* after processing with RDP Algorithm   |  Final Trajectory after B Spline appr
 
 ## Mapping
 * Generated Map of cylpillars.world using gmapping package.
-* I have used ground truth for odometry information.
+* Used ground truth for odometry information.
 
 <img src="https://github.com/Ayush1285/quadrotor_navigation/blob/main/results/pillarsmap.png" height="400"> 
 
